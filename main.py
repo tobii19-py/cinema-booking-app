@@ -12,17 +12,34 @@ class User:
 
 
 class Seat:
-    def database(self):
-        pass
 
-    def seat_id(self):
-        pass
+    database = "cinema.db"
 
-    def price(self):
-        pass
+    def __init__(self, seat_id):
+        self.seat_id = seat_id
+
+    def get_price(self):
+        """Get the price of a specific seat"""
+        connection = sqlite3.connect(self.database)
+        cursor = connection.cursor()
+        cursor.execute("""
+        SELECT "price" FROM "Seat" WHERE "seat_id" = ?
+        """, [self.seat_id])
+        price = cursor.fetchall()[0][0]
+        return price
 
     def is_free(self):
-        pass
+        connection = sqlite3.connect(self.database)
+        cursor = connection.cursor()
+        cursor.execute("""
+        SELECT "taken" FROM "Seat" WHERE "seat_id" = ?
+        """, [self.seat_id])
+        result = cursor.fetchall()[0][0]
+
+        if result == 0:
+            return True
+        else:
+            return False
 
     def occupy(self):
         pass
@@ -66,3 +83,4 @@ class Ticket:
 
 
 name = input("Enter your full name: ")
+seat_id = input("Enter preferred seat number: ")
