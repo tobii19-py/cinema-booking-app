@@ -29,6 +29,7 @@ class Seat:
         return price
 
     def is_free(self):
+        """Check if seat is available"""
         connection = sqlite3.connect(self.database)
         cursor = connection.cursor()
         cursor.execute("""
@@ -42,7 +43,15 @@ class Seat:
             return False
 
     def occupy(self):
-        pass
+        """Change the value of the taken seat in the database"""
+        if self.is_free():
+            connection = sqlite3.connect(self.database)
+            cursor = connection.cursor()
+            cursor.execute("""
+                    UPDATE "Seat" SET "taken"=? WHERE "seat_id"=?
+                    """, [1, self.seat_id])
+            connection.commit()
+            connection.close()
 
 
 class Card:
