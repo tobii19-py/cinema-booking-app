@@ -11,7 +11,17 @@ class User:
         self.name = name
 
     def buy(self, seat, card):
-        pass
+        """Purchases the ticket if the user's card is valid"""
+        if seat.is_free():
+            if card.validate(price=seat.get_price()):
+                seat.occupy()
+                ticket = Ticket(user=self, price=seat.get_price(), seat_number=seat_id)
+                ticket.to_pdf()
+                return "Purchase successful!"
+            else:
+                return "There was a problem with your card!"
+        else:
+            return "Seat is taken!"
 
 
 class Seat:
@@ -96,7 +106,7 @@ class Ticket:
         self.seat_number = seat_number
         self.id = "".join([random.choice(string.ascii_letters) for i in range(8)])
 
-    def to_pdf(self, path):
+    def to_pdf(self):
         """Creates a PDF for movie ticket"""
         pdf = FPDF(orientation="P", unit='pt', format='A4')
         pdf.add_page()
@@ -131,15 +141,16 @@ class Ticket:
         pdf.output("sample.pdf", 'F')
 
 
-name = input("Enter your full name: ")
-seat_id = input("Enter preferred seat number: ")
-card_type = input("Enter your card type: ")
-card_number = input("Enter your card number: ")
-card_cvc = input("Enter your card cvc: ")
-card_holder = input("Enter card holder name: ")
+if __name__ == "__main__":
+    name = input("Enter your full name: ")
+    seat_id = input("Enter preferred seat number: ")
+    card_type = input("Enter your card type: ")
+    card_number = input("Enter your card number: ")
+    card_cvc = input("Enter your card cvc: ")
+    card_holder = input("Enter card holder name: ")
 
-user = User(name=name)
-seat = Seat(seat_id=seat_id)
-card = Card(type=card_type, number=card_number, cvc=card_cvc, holder=card_holder)
+    user = User(name=name)
+    seat = Seat(seat_id=seat_id)
+    card = Card(type=card_type, number=card_number, cvc=card_cvc, holder=card_holder)
 
-print(user.buy(seat=seat, card=card))
+    print(user.buy(seat=seat, card=card))
