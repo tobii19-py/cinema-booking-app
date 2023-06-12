@@ -55,23 +55,34 @@ class Seat:
 
 
 class Card:
-    def database(self):
-        pass
+    database = "banking.db"
 
-    def type(self):
-        pass
-
-    def number(self):
-        pass
-
-    def cvc(self):
-        pass
-
-    def holder(self):
-        pass
+    def __init__(self, type, number, cvc, holder):
+        self.type = type
+        self.number = number
+        self.cvc = cvc
+        self.holder = holder
 
     def validate(self, price):
-        pass
+        """Validates if card is valid and has balance.
+        Then deducts the price from balance.
+        """
+        connection = sqlite3.connect(self.database)
+        cursor = connection.cursor()
+        cursor.execute("""
+        SELECT "balance" FROM "Card" WHERE "number"=? and "cvc"=?
+        """, [self.number, self.cvc])
+        result = cursor.fetchall()
+
+        if result:
+            balance = result[0][0]
+            if balance >= price:
+                connection.execute("""
+                UPDATE "Card" SET "balance" = ? WHERE "number"=? and "cvc"=?
+                """, [balance - price, self.number, self.cvc])
+                connection.commit()
+                connection.close()
+                return True
 
 
 class Ticket:
@@ -93,3 +104,13 @@ class Ticket:
 
 name = input("Enter your full name: ")
 seat_id = input("Enter preferred seat number: ")
+card_type = input("Enter your card type: ")
+card_number = input("Enter your card number: ")
+card_cvc = input("Enter your card cvc: ")
+card_holder = input("Enter card holder name: ")
+
+user = User(name=name)
+seat = Seat(seat_id=seat_id)
+card = Card(type=card_type, number=card_number, cvc=card_cvc, holder=card_holder)
+
+print(user.buy(seat=seat, card=card))
